@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gold Rate — UAE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #16140f;
+    --panel: #1e1b14;
+    --panel-line: #33301f;
+    --brass: #c9a227;
+    --brass-bright: #e6c34a;
+    --paper: #f3ede0;
+    --muted: #948d78;
+    --up: #6fbf73;
+    --down: #d97757;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--ink);
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(201,162,39,0.06), transparent 40%),
+      radial-gradient(circle at 85% 90%, rgba(201,162,39,0.05), transparent 45%);
+    color: var(--paper);
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 18px;
+  }
+
+  .board {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--brass);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .eyebrow .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--up);
+    box-shadow: 0 0 0 3px rgba(111,191,115,0.15);
+  }
+  .eyebrow .dot.stale { background: var(--down); box-shadow: 0 0 0 3px rgba(217,119,87,0.15); }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 22px;
+    margin: 0 0 28px;
+    color: var(--paper);
+    letter-spacing: 0.01em;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 4px;
+    padding: 36px 32px 28px;
+  }
+
+  .karat-row {
+    display: flex;
+    border-bottom: 1px solid var(--panel-line);
+    margin-bottom: 28px;
+  }
+  .karat-row button {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.04em;
+    padding: 0 0 12px;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s ease;
+  }
+  .karat-row button.active { color: var(--brass-bright); }
+  .karat-row button.active::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -1px;
+    height: 2px;
+    background: var(--brass-bright);
+  }
+
+  .price-display { text-align: center; margin-bottom: 8px; }
+  .price-number {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 64px;
+    line-height: 1;
+    color: var(--brass-bright);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+  .price-unit {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 10px;
+    letter-spacing: 0.06em;
+  }
+
+  .delta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    text-align: center;
+    margin-top: 14px;
+    color: var(--muted);
+  }
+  .delta .up { color: var(--up); }
+  .delta .down { color: var(--down); }
+
+  .meta {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--panel-line);
+    display: flex;
+    justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+  .meta .value { color: var(--paper); }
+
+  .foot-note {
+    margin-top: 18px;
+    font-size: 11.5px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.6;
+  }
+  .foot-note a { color: var(--brass); text-decoration: none; border-bottom: 1px dotted var(--brass); }
+
+  #status {
+    text-align: center;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    padding: 40px 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .price-number { transition: opacity 0.25s ease; }
+  }
+</style>
+</head>
+<body>
+  <div class="board">
+    <div class="eyebrow"><span class="dot" id="statusDot"></span><span id="statusLabel">Loading</span></div>
+    <h1>Gold Rate, UAE</h1>
+
+    <div id="status">Fetching latest rate&hellip;</div>
+
+    <div class="panel" id="panel" style="display:none;">
+      <div class="karat-row">
+        <button data-k="gold_24kt" class="active">24K</button>
+        <button data-k="gold_22kt">22K</button>
+        <button data-k="gold_21kt_calc">21K</button>
+        <button data-k="gold_18kt">18K</button>
+      </div>
+
+      <div class="price-display">
+        <div class="price-number" id="priceNumber">—</div>
+        <div class="price-unit">AED per gram</div>
+      </div>
+
+      <div class="delta" id="delta"></div>
+
+      <div class="meta">
+        <div>Last updated<br><span class="value" id="lastUpdated">—</span></div>
+        <div style="text-align:right;">Checked<br><span class="value" id="agoLabel">—</span></div>
+      </div>
+    </div>
+
+    <div class="foot-note">
+      Sourced from Joyalukkas' published UAE rate, refreshed automatically.
+      Not an official retail quote — always confirm at point of purchase.
+    </div>
+  </div>
+
+<script>
+  // 21K isn't returned directly by the source data, but it's always a fixed
+  // fraction of 24K (21/24) the same way 22K and 18K are, so we derive it.
+  function deriveFields(entry) {
+    return {
+      ...entry,
+      gold_21kt_calc: +(entry.gold_24kt * (21 / 24)).toFixed(2),
+    };
+  }
+
+  const LABELS = {
+    gold_24kt: "24K",
+    gold_22kt: "22K",
+    gold_21kt_calc: "21K",
+    gold_18kt: "18K",
+  };
+
+  let history = [];
+  let currentKarat = "gold_24kt";
+
+  function timeAgo(isoString) {
+    const diffMs = Date.now() - new Date(isoString).getTime();
+    const mins = Math.round(diffMs / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins} min ago`;
+    const hrs = Math.round(mins / 60);
+    if (hrs < 24) return `${hrs} hr${hrs > 1 ? "s" : ""} ago`;
+    const days = Math.round(hrs / 24);
+    return `${days} day${days > 1 ? "s" : ""} ago`;
+  }
+
+  function render() {
+    const latest = history[history.length - 1];
+    const previous = history.length > 1 ? history[history.length - 2] : null;
+
+    document.getElementById("priceNumber").textContent = latest[currentKarat].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    const rateDate = new Date(latest.rate_time.replace(" ", "T"));
+    document.getElementById("lastUpdated").textContent = rateDate.toLocaleString(undefined, {
+      month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+    });
+    document.getElementById("agoLabel").textContent = timeAgo(latest.fetched_at);
+
+    // Staleness indicator: if the newest reading is more than 18 hours old,
+    // the collector may have stopped running — flag it visually.
+    const staleMs = Date.now() - new Date(latest.fetched_at).getTime();
+    const isStale = staleMs > 18 * 60 * 60 * 1000;
+    document.getElementById("statusDot").classList.toggle("stale", isStale);
+    document.getElementById("statusLabel").textContent = isStale ? "May be outdated" : "Live";
+
+    const deltaEl = document.getElementById("delta");
+    if (previous) {
+      const diff = latest[currentKarat] - previous[currentKarat];
+      if (Math.abs(diff) < 0.005) {
+        deltaEl.innerHTML = "No change since previous check";
+      } else {
+        const sign = diff > 0 ? "+" : "";
+        const cls = diff > 0 ? "up" : "down";
+        const arrow = diff > 0 ? "▲" : "▼";
+        deltaEl.innerHTML = `<span class="${cls}">${arrow} ${sign}${diff.toFixed(2)} AED</span> since previous check`;
+      }
+    } else {
+      deltaEl.textContent = "";
+    }
+  }
+
+  document.querySelectorAll(".karat-row button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".karat-row button").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentKarat = btn.dataset.k;
+      render();
+    });
+  });
+
+  async function load() {
+    try {
+      const res = await fetch("joyalukkas-history.json", { cache: "no-store" });
+      if (!res.ok) throw new Error("Could not load joyalukkas-history.json");
+      const raw = await res.json();
+      if (!raw.length) throw new Error("History file is empty");
+
+      history = raw.map(deriveFields);
+
+      document.getElementById("status").style.display = "none";
+      document.getElementById("panel").style.display = "block";
+      render();
+
+      // Keep "checked X min ago" ticking without needing a page reload.
+      setInterval(() => {
+        document.getElementById("agoLabel").textContent = timeAgo(history[history.length - 1].fetched_at);
+      }, 60000);
+    } catch (err) {
+      document.getElementById("status").textContent =
+        "Couldn't load the rate history file. Make sure joyalukkas-history.json sits in the same folder as this page.";
+      document.getElementById("statusLabel").textContent = "Unavailable";
+      document.getElementById("statusDot").classList.add("stale");
+      console.error(err);
+    }
+  }
+
+  load();
+</script>
+</body>
+</html>
