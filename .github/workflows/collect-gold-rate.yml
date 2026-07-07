@@ -4,8 +4,8 @@ on:
   schedule:
     # Cron times are in UTC. UAE is UTC+4, so these correspond to
     # roughly 9:00 AM and 4:00 PM Dubai time. Adjust as you like.
-    - cron: "0 5 * * *"   # 09:00 Dubai time
-    - cron: "0 12 * * *"  # 16:00 Dubai time
+    - cron: "7 5 * * *"   # 09:00 Dubai time
+    - cron: "13 12 * * *"  # 16:00 Dubai time
   workflow_dispatch: {}    # lets you trigger it manually from the Actions tab too
 
 permissions:
