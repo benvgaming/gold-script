@@ -48,7 +48,13 @@ const QUERY = `
 async function fetchCurrentRate() {
   const res = await fetch(GRAPHQL_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      // Without this, the API silently falls back to a different store
+      // context and returns troy-ounce-scale numbers instead of the UAE
+      // per-gram AED prices shown on the actual page.
+      "Store": "ae",
+    },
     body: JSON.stringify({
       query: QUERY,
       operationName: "getgoldrates",
