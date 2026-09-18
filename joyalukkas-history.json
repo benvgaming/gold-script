@@ -1248,5 +1248,15 @@
     "gold_24kt": 529.75,
     "silver_rate": 8.9,
     "platinum_rate": 243.3
+  },
+  {
+    "fetched_at": "2026-09-18T16:22:31.267Z",
+    "rate_time": "2026-09-18 18:00:05",
+    "gold_14kt": 312.5,
+    "gold_18kt": 398.75,
+    "gold_22kt": 485.25,
+    "gold_24kt": 524,
+    "silver_rate": 8.9,
+    "platinum_rate": 243.3
   }
 ]
